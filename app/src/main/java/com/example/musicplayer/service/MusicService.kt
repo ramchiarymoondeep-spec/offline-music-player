@@ -106,13 +106,23 @@ class MusicService : Service() {
     }
 
     private fun startForegroundNotification() {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val channel = android.app.NotificationChannel(
+            "music_channel",
+            "Music Playback",
+            android.app.NotificationManager.IMPORTANCE_LOW
+        )
+        getSystemService(android.app.NotificationManager::class.java)?.createNotificationChannel(channel)
+    }
+
         val notification = NotificationCompat.Builder(this, "music_channel")
             .setContentTitle(currentSong?.title ?: "Playing")
             .setContentText(currentSong?.artist ?: "Unknown Artist")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-        startForeground(1, notification)
+        startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+
     }
 
     override fun onDestroy() {
