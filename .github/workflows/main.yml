@@ -1,0 +1,38 @@
+name: Android CI Build
+
+# This tells GitHub to start the build every time you push new code
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Grabs your code from the repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # 2. Sets up the Java environment required for Android
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    # 3. Gives permission to the Gradle wrapper to execute
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 4. Compiles the code into a Debug APK
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug
+
+    # 5. Uploads the finished APK so you can download it
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
