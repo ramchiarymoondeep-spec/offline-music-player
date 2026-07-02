@@ -19,6 +19,12 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    # FIX: This automatically creates the missing gradlew files on the GitHub server
+    - name: Setup Gradle Wrapper
+      run: |
+        npm install -g gradle
+        gradle wrapper
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
