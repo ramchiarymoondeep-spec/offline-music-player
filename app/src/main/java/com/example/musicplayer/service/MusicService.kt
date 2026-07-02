@@ -22,6 +22,12 @@ class MusicService : Service() {
     private var onStateChangeListener: ((Boolean) -> Unit)? = null
     private var onPositionChangeListener: ((Int) -> Unit)? = null
     private var onSongChangeListener: ((Song?) -> Unit)? = null
+    private var onPlaylistEndListener: (() -> Unit)? = null
+    
+    // For auto-play functionality
+    private var playlist: MutableList<Song> = mutableListOf()
+    private var currentIndex = 0
+    private var isAutoPlayEnabled = true
 
     inner class LocalBinder : Binder() {
         fun getService(): MusicService = this@MusicService
@@ -29,14 +35,34 @@ class MusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder = binder
 
+    // Set the playlist for auto-play
+    fun setPlaylist(songs: List<Song>) {
+        playlist = songs.toMutableList()
+    }
+
+    // Enable/Disable auto-play
+    fun setAutoPlayEnabled(enabled: Boolean) {
+        isAutoPlayEnabled = enabled
+    }
+
     fun playSong(song: Song) {
         currentSong = song
+        // Find the song index in the playlist for auto-play
+        currentIndex = playlist.indexOfFirst { it.path == song.path }
         try {
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(song.path)
                 prepare()
                 start()
+                // Set listener for when song finishes
+                setOnCompletionListener {
+                    if (isAutoPlayEnabled) {
+                        playNext()
+                    } else {
+                        onStateChangeListener?.invoke(false)
+                    }
+                }
             }
             onStateChangeListener?.invoke(true)
             onSongChangeListener?.invoke(song)
@@ -45,6 +71,28 @@ class MusicService : Service() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    // Play next song in playlist
+    fun playNext() {
+        if (playlist.isEmpty()) return
+        
+        currentIndex = (currentIndex + 1) % playlist.size
+        
+        // If we've looped back to the start, notify
+        if (currentIndex == 0) {
+            onPlaylistEndListener?.invoke()
+        }
+        
+        playSong(playlist[currentIndex])
+    }
+
+    // Play previous song in playlist
+    fun playPrevious() {
+        if (playlist.isEmpty()) return
+        
+        currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+        playSong(playlist[currentIndex])
     }
 
     fun pausePlayback() {
@@ -83,6 +131,7 @@ class MusicService : Service() {
     fun getDuration(): Int = mediaPlayer?.duration ?: 0
     fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
     fun getCurrentSong(): Song? = currentSong
+    fun getCurrentIndex(): Int = currentIndex
 
     fun setOnStateChangeListener(listener: (Boolean) -> Unit) {
         onStateChangeListener = listener
@@ -96,6 +145,11 @@ class MusicService : Service() {
         onSongChangeListener = listener
     }
 
+    // Set listener for when playlist ends
+    fun setOnPlaylistEndListener(listener: () -> Unit) {
+        onPlaylistEndListener = listener
+    }
+
     private fun updateProgress() {
         serviceScope.launch {
             while (mediaPlayer?.isPlaying == true) {
@@ -106,14 +160,14 @@ class MusicService : Service() {
     }
 
     private fun startForegroundNotification() {
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-        val channel = android.app.NotificationChannel(
-            "music_channel",
-            "Music Playback",
-            android.app.NotificationManager.IMPORTANCE_LOW
-        )
-        getSystemService(android.app.NotificationManager::class.java)?.createNotificationChannel(channel)
-    }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                "music_channel",
+                "Music Playback",
+                android.app.NotificationManager.IMPORTANCE_LOW
+            )
+            getSystemService(android.app.NotificationManager::class.java)?.createNotificationChannel(channel)
+        }
 
         val notification = NotificationCompat.Builder(this, "music_channel")
             .setContentTitle(currentSong?.title ?: "Playing")
@@ -122,7 +176,6 @@ class MusicService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
         startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-
     }
 
     override fun onDestroy() {
