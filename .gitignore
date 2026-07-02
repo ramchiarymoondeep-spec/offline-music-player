@@ -1,0 +1,12 @@
+*.apk
+*.aab
+*.class
+*.log
+build/
+.gradle/
+.idea/
+*.iml
+local.properties
+*.zip
+*.rar
+.DS_Store

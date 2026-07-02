@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Offline Music Player</string>
+    <string name="no_song_playing">No Song Playing</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="play_button">Play</string>
+    <string name="pause_button">Pause</string>
+    <string name="next_button">Next</string>
+    <string name="previous_button">Previous</string>
+    <string name="time_zero">00:00</string>
+</resources>

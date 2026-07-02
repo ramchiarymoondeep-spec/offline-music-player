@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_color">#121212</color>
+    <color name="player_background">#1E1E1E</color>
+    <color name="control_background">#282828</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="secondary_text_color">#B3B3B3</color>
+    <color name="primary_color">#1DB954</color>
+    <color name="accent_color">#1ED760</color>
+</resources>
