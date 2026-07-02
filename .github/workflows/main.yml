@@ -18,13 +18,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # This is the official Gradle tool. It securely handles the build environment.
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        # Force a stable Gradle version
+        gradle-version: '8.7'
 
-    # Notice there is no "./" before gradle. We are using the official system tool.
     - name: Build APK
-      run: gradle assembleDebug --no-daemon
+      # The '< /dev/null' prevents the "Stream closed" crash
+      run: gradle assembleDebug < /dev/null
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
