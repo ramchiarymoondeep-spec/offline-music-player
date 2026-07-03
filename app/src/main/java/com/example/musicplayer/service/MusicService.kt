@@ -169,18 +169,54 @@ class MusicService : Service() {
             getSystemService(android.app.NotificationManager::class.java)?.createNotificationChannel(channel)
         }
 
+                val isPlaying = mediaPlayer?.isPlaying == true
+        val playPauseIcon = if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        val playPauseAction = if (isPlaying) "PAUSE" else "PLAY"
+
         val notification = NotificationCompat.Builder(this, "music_channel")
             .setContentTitle(currentSong?.title ?: "Playing")
             .setContentText(currentSong?.artist ?: "Unknown Artist")
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(android.R.drawable.ic_media_play) 
+            .addAction(android.R.drawable.ic_media_previous, "Previous", getPendingIntent("PREVIOUS"))
+            .addAction(playPauseIcon, "Play/Pause", getPendingIntent(playPauseAction))
+            .addAction(android.R.drawable.ic_media_next, "Next", getPendingIntent("NEXT"))
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(0, 1, 2) 
+            )
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
+
         startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+
     }
 
     override fun onDestroy() {
         mediaPlayer?.release()
         mediaPlayer = null
         super.onDestroy()
+    }     
+override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            "PLAY" -> resumePlayback()
+            "PAUSE" -> pausePlayback()
+            "NEXT" -> playNext()
+            "PREVIOUS" -> playPrevious()
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
+
+    private fun getPendingIntent(action: String): PendingIntent {
+        val intent = Intent(this, MusicService::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getService(
+            this, 
+            0, 
+            intent, 
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
 }
+
+    
