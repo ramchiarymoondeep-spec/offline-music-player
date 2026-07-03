@@ -3,7 +3,15 @@
     android:height="24dp"
     android:viewportWidth="24.0"
     android:viewportHeight="24.0">
+    
+    <!-- 1. The Background Layer (Currently Black) -->
     <path
         android:fillColor="#000000"
+        android:pathData="M0,0h24v24H0z"/>
+
+    <!-- 2. The Original White Music Note -->
+    <path
+        android:fillColor="#FFFFFFFF"
         android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55c-2.21,0 -4,1.79 -4,4s1.79,4 4,4s4,-1.79 4,-4V7h4V3H12z"/>
 </vector>
+
