@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupUI() {
         adapter = SongAdapter(songs) { song, index ->
             currentSongIndex = index
+            musicService?.setPlaylist(songs)
             musicService?.playSong(song)
         }
 
@@ -70,11 +71,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.nextButton.setOnClickListener {
-            playNext()
+            musicService?.playNext()
         }
 
         binding.previousButton.setOnClickListener {
-            playPrevious()
+            musicService?.playPrevious()
         }
 
         binding.progressSeekBar.setOnSeekBarChangeListener(
