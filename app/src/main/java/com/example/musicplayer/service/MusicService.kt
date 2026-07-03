@@ -177,7 +177,7 @@ class MusicService : Service() {
         val notification = NotificationCompat.Builder(this, "music_channel")
             .setContentTitle(currentSong?.title ?: "Playing")
             .setContentText(currentSong?.artist ?: "Unknown Artist")
-            .setSmallIcon(R.drawable.ic_music_clef) 
+            .setSmallIcon(R.drawable.ic_music_code) 
             .addAction(android.R.drawable.ic_media_previous, "Previous", getPendingIntent("PREVIOUS"))
             .addAction(playPauseIcon, "Play/Pause", getPendingIntent(playPauseAction))
             .addAction(android.R.drawable.ic_media_next, "Next", getPendingIntent("NEXT"))
